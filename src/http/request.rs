@@ -37,3 +37,50 @@ impl From<&str> for Version {
         }
     }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Resource {
+    Path(String),
+}
+
+#[derive(Debug, Clone)]
+pub struct RequestLine {
+    method: Method,
+    resource: Resource,
+    version: Version,
+}
+
+impl RequestLine {
+    #[must_use]
+    pub fn method(&self) -> &Method {
+        &self.method
+    }
+
+    #[must_use]
+    pub fn resource(&self) -> &Resource {
+        &self.resource
+    }
+
+    #[must_use]
+    pub fn version(&self) -> &Version {
+        &self.version
+    }
+}
+
+impl From<&str> for RequestLine {
+    fn from(line: &str) -> Self {
+        let mut words = line.split_whitespace();
+
+        let method = words.next().unwrap();
+
+        let resource = words.next().unwrap();
+
+        let version = words.next().unwrap();
+
+        Self {
+            method: method.into(),
+            resource: Resource::Path(resource.into()),
+            version: version.into(),
+        }
+    }
+}
