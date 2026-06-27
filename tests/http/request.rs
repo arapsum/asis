@@ -61,7 +61,7 @@ fn can_convert_str_to_request_line(
     #[case] expected_resource: &str,
     #[case] expected_version: Version,
 ) {
-    let request_line = RequestLine::from(line);
+    let request_line = RequestLine::try_from(line).expect("request line should parse");
 
     assert_eq!(request_line.version(), &expected_version);
     assert_eq!(request_line.method(), &expected_method);
@@ -75,8 +75,7 @@ fn can_convert_str_to_request_line(
 #[case::empty("")]
 #[case::missing_resource("GET")]
 #[case::missing_version("GET /products")]
-#[should_panic]
 #[test]
-fn panics_when_request_line_has_fewer_than_three_tokens(#[case] line: &str) {
-    let _ = RequestLine::from(line);
+fn returns_error_when_request_line_has_fewer_than_three_tokens(#[case] line: &str) {
+    assert!(RequestLine::try_from(line).is_err());
 }
