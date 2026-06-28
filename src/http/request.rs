@@ -1,3 +1,5 @@
+use crate::{Error, Result};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Method {
     Delete,
@@ -38,23 +40,10 @@ impl From<&str> for Version {
     }
 }
 
-use std::{error::Error, fmt};
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Resource {
     Path(String),
 }
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct RequestLineParseError;
-
-impl fmt::Display for RequestLineParseError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "request line must include method, resource, and version")
-    }
-}
-
-impl Error for RequestLineParseError {}
 
 #[derive(Debug, Clone)]
 pub struct RequestLine {
@@ -81,16 +70,22 @@ impl RequestLine {
 }
 
 impl TryFrom<&str> for RequestLine {
-    type Error = RequestLineParseError;
+    type Error = Error;
 
     fn try_from(line: &str) -> Result<Self, Self::Error> {
         let mut words = line.split_whitespace();
 
-        let method = words.next().ok_or(RequestLineParseError)?;
+        let method = words
+            .next()
+            .ok_or_else(|| Error::MalformedRequestLine(line.to_string()))?;
 
-        let resource = words.next().ok_or(RequestLineParseError)?;
+        let resource = words
+            .next()
+            .ok_or_else(|| Error::MalformedRequestLine(line.to_string()))?;
 
-        let version = words.next().ok_or(RequestLineParseError)?;
+        let version = words
+            .next()
+            .ok_or_else(|| Error::MalformedRequestLine(line.to_string()))?;
 
         Ok(Self {
             method: method.into(),

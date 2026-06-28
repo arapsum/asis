@@ -1,3 +1,7 @@
+mod error;
 mod http;
 
-pub use self::http::request;
+pub use self::{
+    error::{Error, Result},
+    http::request,
+};
